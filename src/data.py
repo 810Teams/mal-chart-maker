@@ -74,6 +74,7 @@ class List:
         return None
 
     def count(self, key):
+        ''' Count anime/manga with a specific status '''
         if key == 'all':
             return len(self.data)
         elif key.title().replace('To', 'to') in ('Watching', 'Reading', 'Completed', 'On-Hold', 'Dropped', 'Plan to Watch', 'Plan to Read'):

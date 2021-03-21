@@ -12,7 +12,7 @@ MAL_USERNAME = '810Teams'
 # Main Script
 # - Status Displaying
 DISPLAY_ANIME_STATS = True
-DISPLAY_MANGA_STATS = False
+DISPLAY_MANGA_STATS = True
 
 # - Tags
 ENABLE_TAG_VALIDATIONS = False
