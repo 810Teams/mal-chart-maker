@@ -17,7 +17,7 @@ Replace the `{username}` part in the URL with your MyAnimeList.net username. The
 GET https://myanimelist.net/animelist/{username}/load.json?status=7&offset=0
 ```
 
-## CSS Minification script
+## CSS Minification Script
 
 This script makes use of the existing API to minify the CSS. The API URL is as follows.
 
