@@ -1,5 +1,5 @@
 '''
-    script.py
+    script_chart.py
 '''
 
 from settings import USE_API, MAL_USERNAME, DISPLAY_ANIME_STATS, DISPLAY_MANGA_STATS
