@@ -2,6 +2,8 @@
     script_chart.py
 '''
 
+from json.decoder import JSONDecodeError
+
 from settings import USE_API, MAL_USERNAME, DISPLAY_ANIME_STATS, DISPLAY_MANGA_STATS
 from settings import ENABLE_TAG_VALIDATIONS, MUST_BE_TAGGED, MUST_BE_UNTAGGED, APPLY_TAG_RULES
 from settings import CHART_STYLE, MANUAL_SORT_ANIME, ENABLE_AUTO_CHART_OPEN
@@ -14,32 +16,47 @@ import platform
 import sys
 
 
-def main():
+def main() -> None:
     ''' Main function '''
     # Verify API usage settings
+    print()
+    notice('Program started.')
     if not USE_API:
         loader = XMLLoader('data/')
+        notice('Started file fetching.')
     else:
         if len(sys.argv) > 1 and len(sys.argv[1]) > 0:
             loader = APILoader(sys.argv[1])
+            notice('Fetching API with input username \'{}\'.'.format(sys.argv[1]))
         else:
             loader = APILoader(MAL_USERNAME)
+            notice('Fetching API with set username \'{}\'.'.format(MAL_USERNAME))
+
+    # Create document on loader
+    try:
+        loader.create_document()
+    except JSONDecodeError:
+        if not USE_API:
+            error('XML reading error. Try exporting XML from myanimelist.net again.')
+        else:
+            error('API fetching error. The specified user may not exist.')
+        return
 
     # Load data
-    loader.create_document()
     user = loader.get_user_object(
         include_current=True,
         include_onhold=True,
         include_dropped=True,
         include_planned=True
     )
+    notice('Data retrieved successfully.')
+    print()
 
     # Retrieve improper tagged entries
     improper_tagged_anime = ', '.join(get_improper_tagged(user, list_type='anime'))
     improper_tagged_manga = ', '.join(get_improper_tagged(user, list_type='manga'))
 
     # User data displaying
-    print()
     print('- User Data -')
     print('  Username: {}'.format(user.info.user_name))
     print('  User ID: {}'.format(user.info.user_id))
@@ -160,7 +177,7 @@ def main():
         print()
 
 
-def get_improper_tagged(user, list_type: str='anime'):
+def get_improper_tagged(user, list_type: str='anime') -> list:
     ''' Get improper tagged anime/manga title list '''
     # Verify settings
     if not ENABLE_TAG_VALIDATIONS:
