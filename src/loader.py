@@ -28,6 +28,7 @@ class XMLLoader(Loader):
     """ XML Loader class """
     def __init__(self, data_dir: str):
         """ Constructor """
+        super().__init__()
         self.data_dir = data_dir
 
     def fetch_file_name(self, file_format: str=XML, list_type: str=ANIMELIST, target: int=-1):
@@ -181,6 +182,7 @@ class APILoader(Loader):
     """ API Loader class """
     def __init__(self, username: str):
         """ Constructor """
+        super().__init__()
         self.username = username
 
     def create_document(self):
