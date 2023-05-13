@@ -1,6 +1,6 @@
-'''
+"""
     render.py
-'''
+"""
 
 from math import ceil, floor
 from pygal.style import DefaultStyle
@@ -30,7 +30,7 @@ class RenderMachine:
         self.y_labels_skip = y_labels_skip
 
     def render_pie_chart(self, data, file_name='untitled_chart', title=''):
-        ''' Function: Render pie chart '''
+        """ Function: Render pie chart """
         # Chart Initialization
         chart = pygal.Pie()
 
@@ -42,12 +42,12 @@ class RenderMachine:
                     'label': '{}/{} ({:.2f}%)'.format(len(data[category]), total, 100 * len(data[category]) / total)
                 }]
             )
-        
+
         # Finish Chart
         self.finish_chart(chart, file_name=file_name, show_legend=True, title=title)
 
     def render_bar_chart(self, data, file_name='untitled_chart', title=''):
-        ''' Function: Render bar chart '''
+        """ Function: Render bar chart """
         # Chart Initialization
         chart = pygal.HorizontalStackedBar()
 
@@ -76,12 +76,12 @@ class RenderMachine:
             data_r = [[data_r[j][i] for j in range(len(data_r))] for i in range(len(data_r[0]))]
             data_r = [sum(i) for i in data_r]
             chart.y_labels = self.get_y_labels(0, max(data_r))
-        
+
         # Finish Chart
         self.finish_chart(chart, file_name=file_name, show_legend=isinstance(data, dict), title=title)
 
     def render_treemap(self, data, value=0, label=1, ignore_value=False, file_name='untitled_chart', title=''):
-        ''' Function: renders Treemap chart '''
+        """ Function: renders Treemap chart """
         # Chart Initialization
         chart = pygal.Treemap()
 
@@ -96,10 +96,10 @@ class RenderMachine:
         self.finish_chart(chart, file_name=file_name, show_legend=isinstance(data, dict), title=title)
 
     def finish_chart(self, chart, file_name='untitled_chart', show_legend=True, title=''):
-        ''' Function: Common chart setup and rendering steps '''
+        """ Function: Common chart setup and rendering steps """
         # Chart Titles
         chart.title = title
-        
+
         # Chart Legends
         chart.show_legend = show_legend
         chart.legend_at_bottom = self.legend_at_bottom
@@ -119,13 +119,13 @@ class RenderMachine:
         notice('Chart \'{}\' successfully exported.'.format(file_name))
 
     def get_y_labels(self, data_min, data_max):
-        ''' Function: Calculates y-labels of the chart '''
+        """ Function: Calculates y-labels of the chart """
         data_min = floor(data_min)
         data_max = ceil(data_max)
-        
+
         preset = self.y_labels_preset
         i = 0
-        
+
         if not self.y_labels_skip:
             data_range = list(range(0, data_min - 1, -1)) + list(range(0, data_max + 1, 1))
 
@@ -140,7 +140,7 @@ class RenderMachine:
             while len(data_range) > self.max_y_labels:
                 data_range = list(range(data_min, data_max + preset[i % 3] * 10 ** (i // 3), preset[i % 3] * 10 ** (i // 3)))
                 i += 1
-            
+
         data_range.sort()
 
         return data_range
