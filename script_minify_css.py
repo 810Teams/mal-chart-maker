@@ -1,6 +1,6 @@
-'''
+"""
     minify_css.py
-'''
+"""
 
 from settings import CSS_NAME, CSS_PATH, MIN_CSS_PATH
 from src.utils import notice

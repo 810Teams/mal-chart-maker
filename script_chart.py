@@ -1,6 +1,6 @@
-'''
+"""
     script_chart.py
-'''
+"""
 
 from json.decoder import JSONDecodeError
 
@@ -17,7 +17,7 @@ import sys
 
 
 def main() -> None:
-    ''' Main function '''
+    """ Main function """
     # Verify API usage settings
     print()
     notice('Program started.')
@@ -178,7 +178,7 @@ def main() -> None:
 
 
 def get_improper_tagged(user, list_type: str='anime') -> list:
-    ''' Get improper tagged anime/manga title list '''
+    """ Get improper tagged anime/manga title list """
     # Verify settings
     if not ENABLE_TAG_VALIDATIONS:
         return list()
