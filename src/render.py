@@ -3,9 +3,10 @@
 """
 
 from math import ceil, floor
-from pygal.style import DefaultStyle
+from pygal.style import Style, DefaultStyle
+from pygal import Graph
 
-from src.utils import error, notice
+from src.utils import notice
 
 import pygal
 
@@ -13,13 +14,13 @@ import pygal
 class RenderMachine:
     def __init__(
         self,
-        chart_dir,
-        legend_at_bottom=False,
-        legend_box_size=15,
-        max_y_labels=15,
-        style=DefaultStyle,
-        y_labels_preset=(1, 2, 5),
-        y_labels_skip=False
+        chart_dir: str,
+        legend_at_bottom: bool=False,
+        legend_box_size: int=15,
+        max_y_labels: int=15,
+        style: Style=DefaultStyle,
+        y_labels_preset: tuple=(1, 2, 5),
+        y_labels_skip: bool=False
     ):
         self.chart_dir = chart_dir
         self.legend_at_bottom = legend_at_bottom
@@ -29,7 +30,7 @@ class RenderMachine:
         self.y_labels_preset = y_labels_preset
         self.y_labels_skip = y_labels_skip
 
-    def render_pie_chart(self, data, file_name='untitled_chart', title=''):
+    def render_pie_chart(self, data: list, file_name: str='untitled_chart', title: str=str()):
         """ Function: Render pie chart """
         # Chart Initialization
         chart = pygal.Pie()
@@ -46,7 +47,7 @@ class RenderMachine:
         # Finish Chart
         self.finish_chart(chart, file_name=file_name, show_legend=True, title=title)
 
-    def render_bar_chart(self, data, file_name='untitled_chart', title=''):
+    def render_bar_chart(self, data, file_name: str='untitled_chart', title: str=str()):
         """ Function: Render bar chart """
         # Chart Initialization
         chart = pygal.HorizontalStackedBar()
@@ -80,7 +81,7 @@ class RenderMachine:
         # Finish Chart
         self.finish_chart(chart, file_name=file_name, show_legend=isinstance(data, dict), title=title)
 
-    def render_treemap(self, data, value=0, label=1, ignore_value=False, file_name='untitled_chart', title=''):
+    def render_treemap(self, data, value: int=0, label: int=1, ignore_value: bool=False, file_name: str='untitled_chart', title: str=str()):
         """ Function: renders Treemap chart """
         # Chart Initialization
         chart = pygal.Treemap()
@@ -95,7 +96,7 @@ class RenderMachine:
         # Finish Chart
         self.finish_chart(chart, file_name=file_name, show_legend=isinstance(data, dict), title=title)
 
-    def finish_chart(self, chart, file_name='untitled_chart', show_legend=True, title=''):
+    def finish_chart(self, chart: Graph, file_name: str='untitled_chart', show_legend: bool=True, title: str=str()):
         """ Function: Common chart setup and rendering steps """
         # Chart Titles
         chart.title = title
@@ -118,7 +119,7 @@ class RenderMachine:
         # Notice
         notice('Chart \'{}\' successfully exported.'.format(file_name))
 
-    def get_y_labels(self, data_min, data_max):
+    def get_y_labels(self, data_min: float, data_max: float):
         """ Function: Calculates y-labels of the chart """
         data_min = floor(data_min)
         data_max = ceil(data_max)

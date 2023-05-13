@@ -3,43 +3,21 @@
 """
 
 from src.utils import error
+from src.classes.entry import Entry, Anime, Manga
 
 from math import ceil, floor, sqrt
-
-
-class User:
-    """ User class """
-    def __init__(self, info, anime_list, manga_list, do_refresh=True):
-        """ Constructor """
-        self.info = info
-        self.anime_list = anime_list
-        self.manga_list = manga_list
-
-
-class Info:
-    """ User information class """
-    def __init__(
-        self,
-        user_id,
-        user_name,
-        user_export_type
-    ):
-        """ Constructor """
-        self.user_id = user_id
-        self.user_name = user_name
-        self.user_export_type = user_export_type
 
 
 class List:
     """ User anime/manga list class """
     def __init__(
         self,
-        data=list(),
-        include_current=False,
-        include_onhold=False,
-        include_dropped=False,
-        include_planned=False,
-        tag_rules=None
+        data: list=list(),
+        include_current: bool=False,
+        include_onhold: bool=False,
+        include_dropped: bool=False,
+        include_planned: bool=False,
+        tag_rules: list=None
     ):
         """ Constructor """
         self.data = data
@@ -49,11 +27,11 @@ class List:
         self.include_planned = include_planned
         self.tag_rules = tag_rules
 
-    def add_entry(self, entry):
+    def add_entry(self, entry: Entry) -> None:
         """ Add anime/manga object to the anime/manga list by object """
         self.data.append(entry)
 
-    def get_entry(self, entry_id):
+    def get_entry(self, entry_id: str) -> Entry:
         """ Get anime/manga object from the anime/manga list by anime/manga ID """
         for i in range(len(self.data)):
             if isinstance(self.data[i], Anime) and self.data[i].series_animedb_id == entry_id:
@@ -63,7 +41,7 @@ class List:
 
         return None
 
-    def delete_entry(self, entry_id):
+    def delete_entry(self, entry_id: str) -> Entry:
         """ Delete anime/manga object from the anime/manga list by anime/manga ID """
         for i in range(len(self.data)):
             if isinstance(self.data[i], Anime) and self.data[i].series_animedb_id == entry_id:
@@ -73,7 +51,7 @@ class List:
 
         return None
 
-    def count(self, key):
+    def count(self, key: str) -> int:
         """ Count anime/manga with a specific status """
         if key == 'all':
             return len(self.data)
@@ -81,7 +59,7 @@ class List:
             return len([i for i in self.data if i.my_status == key.title().replace('To', 'to')])
         return 0
 
-    def get_list(self, include_unscored=False):
+    def get_list(self, include_unscored: bool=False) -> list:
         """ Get anime/manga list """
         return [
             i for i in self.data
@@ -92,19 +70,19 @@ class List:
             and (i.my_score != 0 or include_unscored)
         ]
 
-    def get_full_list(self, include_unscored=False):
+    def get_full_list(self, include_unscored: bool=False) -> list:
         """ Get full anime/manga list """
         return [i for i in self.data if i.my_score != 0 or include_unscored]
 
     def get_grouped_list(
         self,
-        include_unscored=False,
-        group_by='series_type',
-        sort_method='most_common',
-        sort_order='descending',
-        manual_sort=None,
-        disassemble_key=None
-    ):
+        include_unscored: bool=False,
+        group_by: str='series_type',
+        sort_method: str='most_common',
+        sort_order: str='descending',
+        manual_sort: list=None,
+        disassemble_key: str=None
+    ) -> dict:
         """ Get grouped anime/manga list """
         grouped_entry_list = dict()
         categories = list()
@@ -158,11 +136,11 @@ class List:
         # Return
         return grouped_entry_list
 
-    def get_scores(self, include_unscored=False):
+    def get_scores(self, include_unscored: bool=False) -> list:
         """ Get anime/manga scores """
         return [i.my_score for i in self.get_list(include_unscored=include_unscored)]
 
-    def get_summed_scores(self, include_unscored=False):
+    def get_summed_scores(self, include_unscored: bool=False) -> list:
         """ Get summed anime/manga scores """
         return [
             self.get_scores(include_unscored=include_unscored).count(i)
@@ -171,12 +149,12 @@ class List:
 
     def get_grouped_scores(
         self,
-        include_unscored=False,
-        group_by='series_type',
-        sort_method='most_common',
-        sort_order='descending',
-        manual_sort=None
-    ):
+        include_unscored: bool=False,
+        group_by: str='series_type',
+        sort_method: str='most_common',
+        sort_order: str='descending',
+        manual_sort: bool=None
+    ) -> dict:
         """ Get grouped anime/manga scores """
         grouped_entry_list = self.get_grouped_list(
             include_unscored=False,
@@ -194,12 +172,12 @@ class List:
 
     def get_summed_grouped_scores(
         self,
-        include_unscored=False,
-        group_by='series_type',
-        sort_method='most_common',
-        sort_order='descending',
-        manual_sort=None
-    ):
+        include_unscored: bool=False,
+        group_by: str='series_type',
+        sort_method: str='most_common',
+        sort_order: str='descending',
+        manual_sort: bool=None
+    ) -> dict:
         """ Get summed grouped anime/manga scores """
         scores = self.get_grouped_scores(
             include_unscored=include_unscored,
@@ -214,20 +192,20 @@ class List:
 
         return scores
 
-    def get_min(self):
+    def get_min(self) -> int:
         """ Get a minimum of the anime/manga list scores """
         return min(self.get_scores())
 
-    def get_max(self):
+    def get_max(self) -> int:
         """ Get a maximum of the anime/manga list scores """
         return max(self.get_scores())
 
-    def get_average(self):
+    def get_average(self) -> float:
         """ Get an average of the anime/manga list scores """
         scores = self.get_scores()
         return sum(scores) / len(scores)
 
-    def get_median(self):
+    def get_median(self) -> int:
         """ Get a median of the anime/manga list scores """
         scores = sorted(self.get_scores())
 
@@ -235,17 +213,17 @@ class List:
             return (scores[len(scores) // 2 - 1] + scores[len(scores) // 2]) / 2
         return scores[len(scores) // 2]
 
-    def get_mode(self):
+    def get_mode(self) -> int:
         """ Get a mode of the anime/manga list scores """
         return max(self.get_summed_scores())
 
-    def get_sd(self):
+    def get_sd(self) -> float:
         """ Get a standard deviation of the anime/manga list scores """
         scores = self.get_scores()
 
         return sqrt(sum([(i - self.get_average()) ** 2 for i in scores]) / len(scores))
 
-    def get_partial(self, percentage, part='top', rounding_method='roundx', include_unscored=False):
+    def get_partial(self, percentage: float, part: str='top', rounding_method: str='roundx', include_unscored: bool=False) -> list:
         """ Get partial anime/manga list """
         # Anime/manga List Initiation
         entry_list = self.get_list(include_unscored=include_unscored)
@@ -286,7 +264,7 @@ class List:
             error('Invalid part `{}` of get_partial().'.format(part))
             return None
 
-    def get_partial_average(self, percentage, part='top', rounding_method='roundx', include_unscored=False):
+    def get_partial_average(self, percentage: float, part: str='top', rounding_method: str='roundx', include_unscored:bool=False) -> float:
         """ Get partial anime/manga list average """
         entry_list = self.get_partial(
             percentage=percentage,
@@ -297,124 +275,3 @@ class List:
         scores = [i.my_score for i in entry_list]
 
         return sum(scores)/len(scores)
-
-
-class Entry:
-    """ Entry class """
-    def __init__(
-        self,
-        my_id=None,
-        my_start_date=None,
-        my_finish_date=None,
-        my_score=None,
-        my_storage=None,
-        my_status=None,
-        my_comments=None,
-        my_tags=None,
-        update_on_import=None
-    ):
-        self.my_id = my_id
-        self.my_start_date = my_start_date
-        self.my_finish_date = my_finish_date
-        self.my_score = my_score
-        self.my_storage = my_storage
-        self.my_status = my_status
-        self.my_comments = my_comments
-        self.my_tags = my_tags
-        self.update_on_import = update_on_import
-
-
-class Anime(Entry):
-    """ Anime class """
-    def __init__(
-        self,
-        series_animedb_id=None,
-        series_title=None,
-        series_type=None,
-        series_episodes=None,
-        my_id=None,
-        my_watched_episodes=None,
-        my_start_date=None,
-        my_finish_date=None,
-        my_rated=None,
-        my_score=None,
-        my_dvd=None,
-        my_storage=None,
-        my_status=None,
-        my_comments=None,
-        my_times_watched=None,
-        my_rewatch_value=None,
-        my_tags=None,
-        my_rewatching=None,
-        my_rewatching_ep=None,
-        update_on_import=None
-    ):
-        """ Constructor """
-        super().__init__(
-            my_id=my_id,
-            my_start_date=my_start_date,
-            my_finish_date=my_finish_date,
-            my_score=my_score,
-            my_storage=my_storage,
-            my_status=my_status,
-            my_comments=my_comments,
-            my_tags=my_tags,
-            update_on_import=update_on_import
-        )
-        self.series_animedb_id = series_animedb_id
-        self.series_title = series_title
-        self.series_type = series_type
-        self.series_episodes = series_episodes
-        self.my_watched_episodes = my_watched_episodes
-        self.my_rated = my_rated
-        self.my_dvd = my_dvd
-        self.my_times_watched = my_times_watched
-        self.my_rewatch_value = my_rewatch_value
-        self.my_rewatching = my_rewatching
-        self.my_rewatching_ep = my_rewatching_ep
-
-
-class Manga(Entry):
-    """ Manga class """
-    def __init__(
-        self,
-        manga_mangadb_id=None,
-        manga_title=None,
-        manga_volumes=None,
-        manga_chapters=None,
-        my_id=None,
-        my_read_volumes=None,
-        my_read_chapters=None,
-        my_start_date=None,
-        my_finish_date=None,
-        my_scanalation_group=None,
-        my_score=None,
-        my_storage=None,
-        my_status=None,
-        my_comments=None,
-        my_times_read=None,
-        my_tags=None,
-        my_reread_value=None,
-        update_on_import=None
-    ):
-        """ Constructor """
-        super().__init__(
-            my_id=my_id,
-            my_start_date=my_start_date,
-            my_finish_date=my_finish_date,
-            my_score=my_score,
-            my_storage=my_storage,
-            my_status=my_status,
-            my_comments=my_comments,
-            my_tags=my_tags,
-            update_on_import=update_on_import
-        )
-        self.manga_mangadb_id = manga_mangadb_id
-        self.manga_title = manga_title
-        self.manga_volumes = manga_volumes
-        self.manga_chapters = manga_chapters
-        self.my_read_volumes = my_read_volumes
-        self.my_read_chapters = my_read_chapters
-        self.my_scanalation_group = my_scanalation_group
-        self.my_times_read = my_times_read
-        self.my_reread_value = my_reread_value

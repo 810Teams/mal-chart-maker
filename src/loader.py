@@ -3,9 +3,13 @@
 """
 
 from xml.dom import minidom
+from xml.dom.minidom import Document
 
-from src.data import Anime, Manga, List, Info, User
-from src.utils import error
+from src.classes.entry import Anime, Manga
+from src.classes.list import List
+from src.classes.info import Info
+from src.classes.user import User
+from src.constants import XML, API_URL, ANIMELIST, MANGALIST, ANIME_STATUS_LIST, MANGA_STATUS_LIST
 
 import os
 import json
@@ -14,13 +18,19 @@ import requests
 
 class Loader:
     """ Loader class """
-    def __init__(self, data_dir):
+    def __init__(self):
         """ Constructor """
-        self.data_dir = data_dir
         self.anime_document = None
         self.manga_document = None
 
-    def fetch_file_name(self, file_format='xml', list_type='animelist', target=-1):
+
+class XMLLoader(Loader):
+    """ XML Loader class """
+    def __init__(self, data_dir: str):
+        """ Constructor """
+        self.data_dir = data_dir
+
+    def fetch_file_name(self, file_format: str=XML, list_type: str=ANIMELIST, target: int=-1):
         """ Fetch file names from the specified directory """
         try:
             return [
@@ -32,13 +42,13 @@ class Loader:
 
     def create_document(self):
         """ Create document object notation (DOM) object """
-        anime_list_file_name = self.fetch_file_name(file_format='xml', list_type='animelist', target=-1)
-        manga_list_file_name = self.fetch_file_name(file_format='xml', list_type='mangalist', target=-1)
+        anime_list_file_name = self.fetch_file_name(file_format=XML, list_type=ANIMELIST, target=-1)
+        manga_list_file_name = self.fetch_file_name(file_format=XML, list_type=MANGALIST, target=-1)
 
         self.anime_document = minidom.parse('{}{}'.format(self.data_dir, anime_list_file_name))
         self.manga_document = minidom.parse('{}{}'.format(self.data_dir, manga_list_file_name))
 
-    def get_element(self, document, element_name, convert_type=True, get_data=False, get_single=False):
+    def get_element(self, document: Document, element_name: str, convert_type: bool=True, get_data: bool=False, get_single: bool=False):
         """ Retrieve elements or data from the specified element name """
         items = document.getElementsByTagName(element_name)
 
@@ -70,7 +80,7 @@ class Loader:
 
         return items
 
-    def get_user_object(self, include_current=False, include_onhold=False, include_dropped=False, include_planned=False):
+    def get_user_object(self, include_current: bool=False, include_onhold: bool=False, include_dropped: bool=False, include_planned: bool=False):
         """ Retrieve user object """
         return User(
             info=self.get_info_object(),
@@ -98,7 +108,7 @@ class Loader:
             user_export_type=      self.get_element(my_info, 'user_export_type',       get_data=True, get_single=True)
         )
 
-    def get_anime_list_object(self, include_current=False, include_onhold=False, include_dropped=False, include_planned=False):
+    def get_anime_list_object(self, include_current: bool=False, include_onhold: bool=False, include_dropped: bool=False, include_planned: bool=False):
         """ Retrieve user anime list object """
         return List(
             data=[self.get_anime_object(i) for i in self.get_element(self.anime_document, 'anime')],
@@ -108,7 +118,7 @@ class Loader:
             include_planned=include_planned
         )
 
-    def get_anime_object(self, anime_element):
+    def get_anime_object(self, anime_element: Document):
         """ Retrieve anime object """
         return Anime(
             series_animedb_id=  self.get_element(anime_element, 'series_animedb_id',   get_data=True, get_single=True),
@@ -133,7 +143,7 @@ class Loader:
             update_on_import=   self.get_element(anime_element, 'update_on_import',    get_data=True, get_single=True)
         )
 
-    def get_manga_list_object(self, include_current=False, include_onhold=False, include_dropped=False, include_planned=False):
+    def get_manga_list_object(self, include_current: bool=False, include_onhold: bool=False, include_dropped: bool=False, include_planned: bool=False):
         """ Retrieve user manga list object """
         return List(
             data=[self.get_manga_object(i) for i in self.get_element(self.manga_document, 'manga')],
@@ -143,7 +153,7 @@ class Loader:
             include_planned=include_planned
         )
 
-    def get_manga_object(self, manga_element):
+    def get_manga_object(self, manga_element: Document):
         """ Retrieve manga object """
         return Manga(
             manga_mangadb_id=    self.get_element(manga_element, 'manga_mangadb_id',     get_data=True, get_single=True),
@@ -167,13 +177,11 @@ class Loader:
         )
 
 
-class Parser():
-    """ Parser """
-    def __init__(self, username):
+class APILoader(Loader):
+    """ API Loader class """
+    def __init__(self, username: str):
         """ Constructor """
         self.username = username
-        self.anime_document = None
-        self.manga_document = None
 
     def create_document(self):
         """ Create document """
@@ -182,27 +190,27 @@ class Parser():
         self.manga_document = list()
 
         # Lambda function
-        api_url = lambda list_type, username, offset: 'https://myanimelist.net/{}/{}/load.json?status=7&offset={}'.format(list_type, username, offset)
+        api_url = lambda list_type, username, offset: API_URL.format(list_type, username, offset)
 
         # Anime Document
         offset = 0
-        response = json.loads(requests.get(api_url('animelist', self.username, offset)).text)
+        response = json.loads(requests.get(api_url(ANIMELIST, self.username, offset)).text)
 
         while len(response) > 0:
             self.anime_document += response
             offset += len(response)
-            response = json.loads(requests.get(api_url('animelist', self.username, offset)).text)
+            response = json.loads(requests.get(api_url(ANIMELIST, self.username, offset)).text)
 
         # Manga Document
         offset = 0
-        response = json.loads(requests.get(api_url('mangalist', self.username, offset)).text)
+        response = json.loads(requests.get(api_url(MANGALIST, self.username, offset)).text)
 
         while len(response) > 0:
             self.manga_document += response
             offset += len(response)
-            response = json.loads(requests.get(api_url('mangalist', self.username, offset)).text)
+            response = json.loads(requests.get(api_url(MANGALIST, self.username, offset)).text)
 
-    def get_user_object(self, include_current=False, include_onhold=False, include_dropped=False, include_planned=False):
+    def get_user_object(self, include_current: bool=False, include_onhold: bool=False, include_dropped: bool=False, include_planned: bool=False):
         """ Retrieve user object """
         return User(
             info=self.get_info_object(),
@@ -228,7 +236,7 @@ class Parser():
             user_export_type=None
         )
 
-    def get_anime_list_object(self, include_current=False, include_onhold=False, include_dropped=False, include_planned=False):
+    def get_anime_list_object(self, include_current: bool=False, include_onhold: bool=False, include_dropped: bool=False, include_planned: bool=False):
         """ Retrieve user anime list object """
         return List(
             data=[self.get_anime_object(i) for i in self.anime_document],
@@ -238,7 +246,7 @@ class Parser():
             include_planned=include_planned
         )
 
-    def get_anime_object(self, anime_data):
+    def get_anime_object(self, anime_data: dict):
         """ Retrieve anime object """
         return Anime(
             series_animedb_id=  anime_data['anime_id'],
@@ -253,7 +261,7 @@ class Parser():
             my_score=           anime_data['score'],
             my_dvd=             None,
             my_storage=         anime_data['storage_string'],
-            my_status=          {1: 'Watching', 2: 'Completed', 3: 'On-Hold', 4: 'Dropped', 6: 'Plan to Watch'}[anime_data['status']],
+            my_status=          ANIME_STATUS_LIST[anime_data['status']],
             my_comments=        None,
             my_times_watched=   None,
             my_rewatch_value=   None,
@@ -263,7 +271,7 @@ class Parser():
             update_on_import=   None
         )
 
-    def get_manga_list_object(self, include_current=False, include_onhold=False, include_dropped=False, include_planned=False):
+    def get_manga_list_object(self, include_current: bool=False, include_onhold: bool=False, include_dropped: bool=False, include_planned: bool=False):
         """ Retrieve user manga list object """
         return List(
             data=[self.get_manga_object(i) for i in self.manga_document],
@@ -273,7 +281,7 @@ class Parser():
             include_planned=include_planned
         )
 
-    def get_manga_object(self, manga_data):
+    def get_manga_object(self, manga_data: dict):
         """ Retrieve manga object """
         return Manga(
             manga_mangadb_id=    manga_data['manga_id'],
@@ -288,7 +296,7 @@ class Parser():
             my_scanalation_group=None,
             my_score=            manga_data['score'],
             my_storage=          None,
-            my_status=           {1: 'Reading', 2: 'Completed', 3: 'On-Hold', 4: 'Dropped', 6: 'Plan to Read'}[manga_data['status']],
+            my_status=           MANGA_STATUS_LIST[manga_data['status']],
             my_comments=         None,
             my_times_read=       None,
             my_tags=             manga_data['tags'],

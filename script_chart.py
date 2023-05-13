@@ -5,13 +5,12 @@
 from settings import USE_API, MAL_USERNAME, DISPLAY_ANIME_STATS, DISPLAY_MANGA_STATS
 from settings import ENABLE_TAG_VALIDATIONS, MUST_BE_TAGGED, MUST_BE_UNTAGGED, APPLY_TAG_RULES
 from settings import CHART_STYLE, MANUAL_SORT_ANIME, ENABLE_AUTO_CHART_OPEN
-from src.loader import Loader, Parser
+from src.loader import XMLLoader, APILoader
 from src.render import RenderMachine
 from src.utils import notice, error
 
 import os
 import platform
-import requests
 import sys
 
 
@@ -19,12 +18,12 @@ def main():
     ''' Main function '''
     # Verify API usage settings
     if not USE_API:
-        loader = Loader('data/')
+        loader = XMLLoader('data/')
     else:
         if len(sys.argv) > 1 and len(sys.argv[1]) > 0:
-            loader = Parser(sys.argv[1])
+            loader = APILoader(sys.argv[1])
         else:
-            loader = Parser(MAL_USERNAME)
+            loader = APILoader(MAL_USERNAME)
 
     # Load data
     loader.create_document()
@@ -34,7 +33,7 @@ def main():
         include_dropped=True,
         include_planned=True
     )
-    
+
     # Retrieve improper tagged entries
     improper_tagged_anime = ', '.join(get_improper_tagged(user, list_type='anime'))
     improper_tagged_manga = ', '.join(get_improper_tagged(user, list_type='manga'))
@@ -161,7 +160,7 @@ def main():
         print()
 
 
-def get_improper_tagged(user, list_type='anime'):
+def get_improper_tagged(user, list_type: str='anime'):
     ''' Get improper tagged anime/manga title list '''
     # Verify settings
     if not ENABLE_TAG_VALIDATIONS:
@@ -179,7 +178,7 @@ def get_improper_tagged(user, list_type='anime'):
     improper = list()
     improper += [i for i in entry_list if (not isinstance(i.my_tags, str) or len(i.my_tags) == 0) and i.my_status in MUST_BE_TAGGED]   # not tagged in must tagged
     improper += [i for i in entry_list if (isinstance(i.my_tags, str) and len(i.my_tags) > 0)     and i.my_status in MUST_BE_UNTAGGED] # tagged in must untagged
-    
+
     # Loads tag rules
     tag_rules = [i.replace('\n', str()) for i in open('TAG_RULES.txt')]
     tag_rules = [tuple(sorted([j.lower().strip() for j in i.split(',')])) for i in tag_rules]
@@ -194,7 +193,7 @@ def get_improper_tagged(user, list_type='anime'):
 
             if temp[i].my_tags not in tag_rules:
                 improper.append(temp[i])
-    
+
     # Return
     if list_type == 'anime':
         return [i.series_title for i in improper]
