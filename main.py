@@ -83,7 +83,10 @@ def main() -> None:
             print('SD: {:.2f}'.format(user.anime_list.get_sd()))
             print()
             print('  Improper Tagged')
-            print('  {}'.format(improper_tagged_anime) if len(improper_tagged_anime) > 0 else '  None, all anime are being tagged properly.')
+            if ENABLE_TAG_VALIDATIONS:
+                print('  {}'.format(improper_tagged_anime) if len(improper_tagged_anime) > 0 else '  None, all anime are being tagged properly.')
+            else:
+                print('  Tags validation is set to off.')
             print()
 
     # Manga statistics displaying
@@ -107,7 +110,10 @@ def main() -> None:
             print('SD: {:.2f}'.format(user.manga_list.get_sd()))
             print()
             print('  Improper Tagged')
-            print('  {}'.format(improper_tagged_manga) if len(improper_tagged_manga) > 0 else '  None, all manga are being tagged properly.')
+            if ENABLE_TAG_VALIDATIONS:
+                print('  {}'.format(improper_tagged_manga) if len(improper_tagged_manga) > 0 else '  None, all manga are being tagged properly.')
+            else:
+                print('  Tags validation is set to off.')
             print()
 
     # Render machine initiation
@@ -179,10 +185,6 @@ def main() -> None:
 
 def get_improper_tagged(user, list_type: str='anime') -> list:
     """ Get improper tagged anime/manga title list """
-    # Verify settings
-    if not ENABLE_TAG_VALIDATIONS:
-        return list()
-
     # Loads list
     if list_type == 'anime':
         entry_list = user.anime_list.get_full_list(include_unscored=True)
@@ -213,9 +215,9 @@ def get_improper_tagged(user, list_type: str='anime') -> list:
 
     # Return
     if list_type == 'anime':
-        return [i.series_title for i in improper]
+        return sorted([str(i.series_title) for i in improper])
     elif list_type == 'manga':
-        return [i.manga_title for i in improper]
+        return sorted([str(i.manga_title) for i in improper])
 
 
 if __name__ == '__main__':

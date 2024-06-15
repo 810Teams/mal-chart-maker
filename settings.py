@@ -15,7 +15,7 @@ DISPLAY_ANIME_STATS = True
 DISPLAY_MANGA_STATS = True
 
 # - Tags
-ENABLE_TAG_VALIDATIONS = False
+ENABLE_TAG_VALIDATIONS = True
 MUST_BE_TAGGED = ('Watching', 'Completed', 'On-Hold')
 MUST_BE_UNTAGGED = ('Dropped', 'Planned')
 APPLY_TAG_RULES = ('Watching', 'Completed', 'On-Hold')
